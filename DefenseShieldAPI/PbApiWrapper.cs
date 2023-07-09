@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces;
 using VRage.Game.ModAPI;
@@ -42,7 +43,7 @@ namespace DefenseShields
         public PbApiWrapper(IMyTerminalBlock block)
         {
             _block = block;
-            var delegates = _block.GetProperty("DefenseSystemsPbAPI")?.As<Dictionary<string, Delegate>>().GetValue(_block);
+            var delegates = _block.GetProperty("DefenseSystemsPbAPI")?.As<IReadOnlyDictionary<string, Delegate>>().GetValue(_block);
             if (delegates == null) return;
 
             _rayIntersectShield = (Func<IMyTerminalBlock, RayD, Vector3D?>)delegates["RayIntersectShield"];
