@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using Sandbox.ModAPI;
+using Sandbox.ModAPI.Ingame;
 using Sandbox.ModAPI.Interfaces;
-using VRage.Game.ModAPI;
-using VRage.ModAPI;
+using VRage.Game.ModAPI.Ingame;
 using VRageMath;
 namespace DefenseShields
 {
