@@ -207,7 +207,7 @@ namespace CoreSystems.Api
         /// <returns>
         /// <see cref="MyTuple{bool, int, int}"/> with contents:
         /// <list type="number">
-        /// <item><see cref="bool"/> Is locked?</item>
+        /// <item><see cref="bool"/> Is being locked?</item>
         /// <item><see cref="int"/> Number of locked projectiles.</item>
         /// <item><see cref="int"/> Time (in ticks) locked.</item>
         /// </list>
