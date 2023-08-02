@@ -347,74 +347,345 @@ namespace CoreSystems.Api
         public float GetMaxWeaponRange(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, int weaponId) =>
             _getMaxWeaponRange?.Invoke(weapon, weaponId) ?? 0f;
 
-
+        /// <summary>
+        /// Populates <paramref name="collection"/> with contents:
+        /// <list type="bullet">
+        /// <item><see cref="string"/> Allowed target type name for <paramref name="weaponId"/> on <paramref name="weapon"/>.</item>
+        /// </list>
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <param name="collection"></param>
+        /// <param name="weaponId"></param>
+        /// <returns>true if <paramref name="weaponId"/> and <paramref name="weapon"/> are valid, false otherwise.</returns>
         public bool GetTurretTargetTypes(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, IList<string> collection, int weaponId = 0) =>
             _getTurretTargetTypes?.Invoke(weapon, collection, weaponId) ?? false;
 
+        /// <summary>
+        /// Sets allowed target types for <paramref name="weaponId"/> on <paramref name="weapon"/> to <paramref name="collection"/>.
+        /// </summary>
+        /// <remarks>
+        /// Invalid target types are ignored.
+        /// </remarks>
+        /// <param name="weapon"></param>
+        /// <param name="collection"></param>
+        /// <param name="weaponId"></param>
         public void SetTurretTargetTypes(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, IList<string> collection, int weaponId = 0) =>
             _setTurretTargetTypes?.Invoke(weapon, collection, weaponId);
 
+        /// <summary>
+        /// Sets the current Aiming Range of <paramref name="weapon"/> to <paramref name="range"/>.
+        /// </summary>
+        /// <remarks>
+        /// Values over the maximum possible Aiming Range of <paramref name="weapon"/> will set it to the maximum possible.
+        /// </remarks>
+        /// <param name="weapon"></param>
+        /// <param name="range"></param>
         public void SetBlockTrackingRange(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, float range) =>
             _setBlockTrackingRange?.Invoke(weapon, range);
 
+        /// <summary>
+        /// Returns whether or not <paramref name="weaponId"/> on <paramref name="weapon"/> is aligned with EntityID <paramref name="targetEnt"/>.
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <param name="targetEnt"></param>
+        /// <param name="weaponId"></param>
+        /// <returns>true if aligned and valid, false otherwise.</returns>
         public bool IsTargetAligned(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, long targetEnt, int weaponId) =>
             _isTargetAligned?.Invoke(weapon, targetEnt, weaponId) ?? false;
 
+        /// <summary>
+        /// Returns whether or not <paramref name="weaponId"/> on <paramref name="weapon"/> is aligned with EntityID <paramref name="targetEnt"/>.
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <param name="targetEnt"></param>
+        /// <param name="weaponId"></param>
+        /// <returns>
+        /// <see cref="MyTuple{bool, Vector3D}"/> with contents:
+        /// <list type="number">
+        /// <item><see cref="bool"/> Is aligned? False if invalid.</item>
+        /// <item><see cref="Vector3D"/> Position of target. Null if invalid.</item>
+        /// </list>
+        /// </returns>
         public MyTuple<bool, Vector3D?> IsTargetAlignedExtended(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, long targetEnt, int weaponId) =>
             _isTargetAlignedExtended?.Invoke(weapon, targetEnt, weaponId) ?? new MyTuple<bool, Vector3D?>();
 
+        /// <summary>
+        /// Returns whether or not <paramref name="weaponId"/> on <paramref name="weapon"/> is aligned with EntityID <paramref name="targetEnt"/>.
+        /// </summary>
+        /// <remarks>
+        /// Like <see cref="IsTargetAligned"/>, but takes target velocity and acceleration into account.
+        /// </remarks>
+        /// <param name="weapon"></param>
+        /// <param name="targetEnt"></param>
+        /// <param name="weaponId"></param>
+        /// <returns>true if aligned and valid, false otherwise</returns>
         public bool CanShootTarget(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, long targetEnt, int weaponId) =>
             _canShootTarget?.Invoke(weapon, targetEnt, weaponId) ?? false;
 
+        /// <summary>
+        /// Returns the lead position of <paramref name="weaponId"/> on <paramref name="weapon"/>, with target EntityId <paramref name="targetEnt"/>.
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <param name="targetEnt"></param>
+        /// <param name="weaponId"></param>
+        /// <returns>Nullable <see cref="Vector3D"/> target lead position. Null if target or weapon invalid.</returns>
         public Vector3D? GetPredictedTargetPosition(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, long targetEnt, int weaponId) =>
             _getPredictedTargetPos?.Invoke(weapon, targetEnt, weaponId) ?? null;
 
+        /// <summary>
+        /// Returns the heat level of <paramref name="weapon"/>.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="weapon"/> is invalid or does not have heat, returns 0f. Heat may exceed 1.0f in case of overheat.
+        /// </remarks>
+        /// <param name="weapon"></param>
+        /// <returns><see cref="float"/> heat as percentage between 0.0f and 1.0f</returns>
         public float GetHeatLevel(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon) => _getHeatLevel?.Invoke(weapon) ?? 0f;
+
+        /// <summary>
+        /// Returns current power consumption of <paramref name="weapon"/>.
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <returns><see cref="float"/> Power in MW</returns>
         public float GetCurrentPower(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon) => _currentPowerConsumption?.Invoke(weapon) ?? 0f;
+
+        /// <summary>
+        /// Returns maximum power consumption of <paramref name="weapon"/>.
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <returns><see cref="float"/> Power in MW</returns>
         public float GetMaxPower(MyDefinitionId weaponDef) => _getMaxPower?.Invoke(weaponDef) ?? 0f;
+
+        /// <summary>
+        /// Returns whether or not EntityId <paramref name="entity"/> has a GridAi.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns>true if GridAi present, false otherwise.</returns>
         public bool HasGridAi(long entity) => _hasGridAi?.Invoke(entity) ?? false;
+
+        /// <summary>
+        /// Returns whether or not <see cref="IMyTerminalBlock"/> <paramref name="weapon"/> has a WeaponCore weapon.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns>true if weapon present, false otherwise.</returns>
         public bool HasCoreWeapon(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon) => _hasCoreWeapon?.Invoke(weapon) ?? false;
+
+        /// <summary>
+        /// Returns the total optimal DPS of <see cref="IMyCubeGrid"/> with EntityId <paramref name="entity"/>.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns><see cref="float"/> DPS.</returns>
         public float GetOptimalDps(long entity) => _getOptimalDps?.Invoke(entity) ?? 0f;
 
+        /// <summary>
+        /// Returns the active ammo name of <paramref name="weaponId"/> on <paramref name="weapon"/>.
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <param name="weaponId"></param>
+        /// <returns><see cref="string"/> AmmoName</returns>
         public string GetActiveAmmo(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, int weaponId) =>
             _getActiveAmmo?.Invoke(weapon, weaponId) ?? null;
 
+        /// <summary>
+        /// Sets the active ammo name of <paramref name="weaponId"/> on <paramref name="weapon"/> to <see cref="string"/> <paramref name="ammoType"/>.
+        /// </summary>
+        /// <remarks>
+        /// Does nothing if <paramref name="ammoType"/> is invalid.
+        /// </remarks>
+        /// <param name="weapon"></param>
+        /// <param name="weaponId"></param>
         public void SetActiveAmmo(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, int weaponId, string ammoType) =>
             _setActiveAmmo?.Invoke(weapon, weaponId, ammoType);
 
+        /// <summary>
+        /// Assigns projectile callback <paramref name="action"/> to <paramref name="weaponId"/> on <paramref name="weapon"/>.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="action"/> has parameters:
+        /// <list type="number">
+        /// <item><see cref="long"/> Parent weapon EntityId?</item>
+        /// <item><see cref="int"/> Parent weapon partId</item>
+        /// <item><see cref="ulong"/> Projectile EntityId</item>
+        /// <item><see cref="long"/> Target EntityId</item>
+        /// <item><see cref="Vector3D"/> ProjectilePosition if active, LastHit if destroyed</item>
+        /// <item><see cref="bool"/> ProjectileExists?</item>
+        /// </list>
+        /// </remarks>
+        /// <param name="weapon"></param>
+        /// <param name="weaponId"></param>
+        /// <param name="action"></param>
         public void MonitorProjectileCallback(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, int weaponId, Action<long, int, ulong, long, Vector3D, bool> action) =>
             _monitorProjectile?.Invoke(weapon, weaponId, action);
 
+        /// <summary>
+        /// Unassigns projectile callback <paramref name="action"/> to <paramref name="weaponId"/> on <paramref name="weapon"/>.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="action"/> has parameters:
+        /// <list type="number">
+        /// <item><see cref="long"/> Parent weapon EntityId?</item>
+        /// <item><see cref="int"/> Parent weapon partId</item>
+        /// <item><see cref="ulong"/> Projectile EntityId</item>
+        /// <item><see cref="long"/> Target EntityId</item>
+        /// <item><see cref="Vector3D"/> ProjectilePosition if active, LastHit if destroyed</item>
+        /// <item><see cref="bool"/> ProjectileExists?</item>
+        /// </list>
+        /// </remarks>
+        /// <param name="weapon"></param>
+        /// <param name="weaponId"></param>
+        /// <param name="action"></param>
         public void UnMonitorProjectileCallback(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, int weaponId, Action<long, int, ulong, long, Vector3D, bool> action) =>
             _unMonitorProjectile?.Invoke(weapon, weaponId, action);
 
+        /// <summary>
+        /// Returns ProjectileState of <paramref name="projectileId"/>.
+        /// </summary>
+        /// <param name="projectileId"></param>
+        /// <returns>
+        /// <see cref="MyTuple{Vector3D, Vector3D, float, float, long, string}"/> with contents:
+        /// <list type="number">
+        /// <item><see cref="Vector3D"/> Position</item>
+        /// <item><see cref="Vector3D"/> Velocity</item>
+        /// <item><see cref="float"/> BaseDamagePool</item>
+        /// <item><see cref="float"/> BaseHealthPool</item>
+        /// <item><see cref="long"/> Target EntityId</item>
+        /// <item><see cref="string"/> AmmoRound Name</item>
+        /// </list>
+        /// </returns>
         public MyTuple<Vector3D, Vector3D, float, float, long, string> GetProjectileState(ulong projectileId) =>
             _getProjectileState?.Invoke(projectileId) ?? new MyTuple<Vector3D, Vector3D, float, float, long, string>();
-        
+
+        /// <summary>
+        /// Returns the total effective DPS of <see cref="IMyCubeGrid"/> with EntityId <paramref name="entity"/>.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns><see cref="float"/> DPS.</returns>
         public float GetConstructEffectiveDps(long entity) => _getConstructEffectiveDps?.Invoke(entity) ?? 0f;
 
+        /// <summary>
+        /// Returns the Id of <paramref name="weapon"/>'s controlling player.
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <returns><see cref="long"/> PlayerId. -1 if invalid or uncontrolled.</returns>
         public long GetPlayerController(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon) => _getPlayerController?.Invoke(weapon) ?? -1;
 
+        /// <summary>
+        /// Returns the rotation matrix of <paramref name="weaponId"/> on <paramref name="weapon"/>'s azimuth part.
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <param name="weaponId"></param>
+        /// <returns><see cref="Matrix"/> AzimuthMatrix</returns>
         public Matrix GetWeaponAzimuthMatrix(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, int weaponId) =>
             _getWeaponAzimuthMatrix?.Invoke(weapon, weaponId) ?? Matrix.Zero;
 
+        /// <summary>
+        /// Returns the rotation matrix of <paramref name="weaponId"/> on <paramref name="weapon"/>'s elevation part.
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <param name="weaponId"></param>
+        /// <returns><see cref="Matrix"/> ElevationMatrix</returns>
         public Matrix GetWeaponElevationMatrix(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, int weaponId) =>
             _getWeaponElevationMatrix?.Invoke(weapon, weaponId) ?? Matrix.Zero;
 
+        /// <summary>
+        /// Returns whether or not <paramref name="targetId"/> is a valid target for <paramref name="weapon"/>.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="onlyThreats"/> will return false if <paramref name="targetId"/>'s threat score is zero.
+        /// <para><paramref name="checkRelations"/> will return false if <paramref name="targetId"/> is non-hostile.</para>
+        /// </remarks>
+        /// <param name="weapon"></param>
+        /// <param name="targetId"></param>
+        /// <param name="onlyThreats"></param>
+        /// <param name="checkRelations"></param>
+        /// <returns></returns>
         public bool IsTargetValid(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, long targetId, bool onlyThreats, bool checkRelations) =>
             _isTargetValid?.Invoke(weapon, targetId, onlyThreats, checkRelations) ?? false;
 
+        /// <summary>
+        /// Returns scope information of <paramref name="weaponId"/> on <paramref name="weapon"/>.
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <param name="weaponId"></param>
+        /// <returns>
+        /// <see cref="MyTuple{Vector3D, Vector3D}"/> with contents:
+        /// <list type="number">
+        /// <item><see cref="Vector3D"/> Position</item>
+        /// <item><see cref="Vector3D"/> Direction</item>
+        /// </list>
+        /// </returns>
         public MyTuple<Vector3D, Vector3D> GetWeaponScope(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, int weaponId) =>
             _getWeaponScope?.Invoke(weapon, weaponId) ?? new MyTuple<Vector3D, Vector3D>();
+
         // terminalBlock, Threat, Other, Something 
+        /// <summary>
+        /// Returns whether or not <paramref name="block"/>'s <see cref="IMyCubeGrid"/>'s GridAi's PrimaryTarget is in range.
+        /// </summary>
+        /// <remarks>
+        /// The second value in the returned <see cref="MyTuple"/> might be legacy from when players could select two targets.
+        /// </remarks>
+        /// <param name="block"></param>
+        /// <returns>
+        /// <see cref="MyTuple{bool, bool}"/> with contents:
+        /// <list type="number">
+        /// <item><see cref="bool"/> PrimaryTarget In Range?</item>
+        /// <item><see cref="bool"/> OtherTarget In Range?</item>
+        /// </list>
+        /// </returns>
         public MyTuple<bool, bool> IsInRange(Sandbox.ModAPI.Ingame.IMyTerminalBlock block) =>
             _isInRange?.Invoke(block) ?? new MyTuple<bool, bool>();
+
+        /// <summary>
+        /// Adds event monitor <paramref name="action"/> to weapon <paramref name="partId"/> on <paramref name="entity"/>.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="action"/> has parameters:
+        /// <list type="number">
+        /// <item><see cref="int"/> State</item>
+        /// <item><see cref="bool"/> Active</item>
+        /// </list>
+        /// 
+        /// <para>
+        /// List of event triggers:<br/>
+        /// 0  Reloading<br/>
+        /// 1  Firing<br/>
+        /// 2  Tracking<br/>
+        /// 3  Overheated<br/>
+        /// 4  TurnOn<br/>
+        /// 5  TurnOff<br/>
+        /// 6  BurstReload<br/>
+        /// 7  NoMagsToLoad<br/>
+        /// 8  PreFire<br/>
+        /// 9  EmptyOnGameLoad<br/>
+        /// 10 StopFiring<br/>
+        /// 11 StopTracking<br/>
+        /// 12 LockDelay<br/>
+        /// 13 Init<br/>
+        /// 14 Homing<br/>
+        /// 15 TargetAligned<br/>
+        /// 16 WhileOn<br/>
+        /// 17 TargetRanged100<br/>
+        /// 18 TargetRanged75<br/>
+        /// 19 TargetRanged50<br/>
+        /// 20 TargetRanged25
+        /// </para>
+        /// </remarks>
+        /// <param name="entity"></param>
+        /// <param name="partId"></param>
+        /// <param name="action"></param>
         public void MonitorEvents(Sandbox.ModAPI.Ingame.IMyTerminalBlock entity, int partId, Action<int, bool> action) =>
             _monitorEvents?.Invoke(entity, partId, action);
 
         /// <summary>
-        /// Removes event monitoring from 
+        /// Removes event monitor <paramref name="action"/> from weapon <paramref name="partId"/> on <paramref name="entity"/>.
         /// </summary>
+        /// <remarks>
+        /// <paramref name="action"/> has parameters:
+        /// <list type="number">
+        /// <item><see cref="int"/> State</item>
+        /// <item><see cref="bool"/> Active</item>
+        /// </list>
+        /// </remarks>
         /// <param name="entity"></param>
         /// <param name="partId"></param>
         /// <param name="action"></param>
