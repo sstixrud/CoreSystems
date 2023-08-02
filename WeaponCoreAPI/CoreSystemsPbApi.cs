@@ -56,6 +56,18 @@ namespace CoreSystems.Api
         private Func<Sandbox.ModAPI.Ingame.IMyTerminalBlock, MyTuple<bool, bool>> _isInRange;
         private Action<Sandbox.ModAPI.Ingame.IMyTerminalBlock, int, Action<int, bool>> _monitorEvents;
         private Action<Sandbox.ModAPI.Ingame.IMyTerminalBlock, int, Action<int, bool>> _unmonitorEvents;
+
+        // Descriptions made by Aristeas, with Sigmund Froid's https://steamcommunity.com/sharedfiles/filedetails/?id=2178802013 as a reference.
+
+        /// <summary>
+        /// Activates the WcPbAPI using <see cref="IMyTerminalBlock"/> <paramref name="pbBlock"/>.
+        /// </summary>
+        /// <remarks>
+        /// Recommended to use 'Me' in <paramref name="pbBlock"/> for simplicity.
+        /// </remarks>
+        /// <param name="pbBlock"></param>
+        /// <returns><see cref="true"/>  if all methods assigned correctly, <see cref="false"/>  otherwise</returns>
+        /// <exception cref="Exception">Throws exception if WeaponCore is not present</exception>
         public bool Activate(Sandbox.ModAPI.Ingame.IMyTerminalBlock pbBlock)
         {
             var dict = pbBlock.GetProperty("WcPbAPI")?.As<IReadOnlyDictionary<string, Delegate>>().GetValue(pbBlock);
@@ -63,6 +75,14 @@ namespace CoreSystems.Api
             return ApiAssign(dict);
         }
 
+        /// <summary>
+        /// Bulk calls <see cref="AssignMethod" /> for all WcPbAPI methods.
+        /// </summary>
+        /// <remarks>
+        /// Not useful for most scripts, but is public nonetheless.
+        /// </remarks>
+        /// <param name="delegates"></param>
+        /// <returns><see cref="true"/>  if all methods assigned correctly, <see cref="false"/>  otherwise</returns>
         public bool ApiAssign(IReadOnlyDictionary<string, Delegate> delegates)
         {
             if (delegates == null)
@@ -114,6 +134,17 @@ namespace CoreSystems.Api
             return true;
         }
 
+        /// <summary>
+        /// Links method <paramref name="field"/> to internal API method of name <paramref name="name"/>
+        /// </summary>
+        /// <remarks>
+        /// Not useful for most scripts, but is public nonetheless.
+        /// </remarks>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="delegates"></param>
+        /// <param name="name"></param>
+        /// <param name="field"></param>
+        /// <exception cref="Exception"></exception>
         private void AssignMethod<T>(IReadOnlyDictionary<string, Delegate> delegates, string name, ref T field) where T : class
         {
             if (delegates == null) {
@@ -131,47 +162,191 @@ namespace CoreSystems.Api
                     $"{GetType().Name} :: Delegate {name} is not type {typeof(T)}, instead it's: {del.GetType()}");
         }
 
+        /// <summary>
+        /// Populates <paramref name="collection"/> with <see cref="MyDefinitionId"/> of all loaded WeaponCore weapons.
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <seealso cref="GetAllCoreStaticLaunchers"/>
+        /// <seealso cref="GetAllCoreTurrets"/>
         public void GetAllCoreWeapons(ICollection<MyDefinitionId> collection) => _getCoreWeapons?.Invoke(collection);
 
+        /// <summary>
+        /// Populates <paramref name="collection"/> with <see cref="MyDefinitionId"/> of all loaded WeaponCore fixed weapons.
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <seealso cref="GetAllCoreWeapons"/>
+        /// <seealso cref="GetAllCoreTurrets"/>
         public void GetAllCoreStaticLaunchers(ICollection<MyDefinitionId> collection) =>
             _getCoreStaticLaunchers?.Invoke(collection);
 
+        /// <summary>
+        /// Populates <paramref name="collection"/> with <see cref="MyDefinitionId"/> of all loaded WeaponCore turret weapons.
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <seealso cref="GetAllCoreWeapons"/>
+        /// <seealso cref="GetAllCoreStaticLaunchers"/>
         public void GetAllCoreTurrets(ICollection<MyDefinitionId> collection) => _getCoreTurrets?.Invoke(collection);
 
+        /// <summary>
+        /// Populates <paramref name="collection"/> with <see cref="IDictionary{String, Int32}"/> of contents:
+        /// <list type="bullet">
+        /// <item>Key: Name of weapon.</item>
+        /// <item>Value: ID of weapon within <paramref name="weaponBlock"/>.</item>
+        /// </list>
+        /// </summary>
+        /// <param name="weaponBlock"></param>
+        /// <param name="collection"></param>
+        /// <returns></returns>
         public bool GetBlockWeaponMap(Sandbox.ModAPI.Ingame.IMyTerminalBlock weaponBlock, IDictionary<string, int> collection) =>
             _getBlockWeaponMap?.Invoke(weaponBlock, collection) ?? false;
 
+        /// <summary>
+        /// Returns a <see cref="MyTuple{bool, int, int}"/> containing information about projectiles targeting <paramref name="victim"/>.
+        /// </summary>
+        /// <param name="victim"></param>
+        /// <returns>
+        /// <see cref="MyTuple{bool, int, int}"/> with contents:
+        /// <list type="number">
+        /// <item><see cref="bool"/> Is locked?</item>
+        /// <item><see cref="int"/> Number of locked projectiles.</item>
+        /// <item><see cref="int"/> Time (in ticks) locked.</item>
+        /// </list>
+        /// </returns>
         public MyTuple<bool, int, int> GetProjectilesLockedOn(long victim) =>
             _getProjectilesLockedOn?.Invoke(victim) ?? new MyTuple<bool, int, int>();
 
+        /// <summary>
+        /// Populates <paramref name="collection"/> with contents:
+        /// <list type="bullet">
+        /// <item>Key: Hostile <see cref="MyDetectedEntityInfo"/> within targeting range of <paramref name="pBlock"/>'s grid</item>
+        /// <item>Value: Threat level of Key</item>
+        /// </list>
+        /// </summary>
+        /// <param name="pBlock"></param>
+        /// <param name="collection"></param>
         public void GetSortedThreats(Sandbox.ModAPI.Ingame.IMyTerminalBlock pBlock, IDictionary<MyDetectedEntityInfo, float> collection) =>
             _getSortedThreats?.Invoke(pBlock, collection);
+
+        /// <summary>
+        /// Populates <paramref name="collection"/> with contents:
+        /// <list type="bullet">
+        /// <item>Friendly <see cref="MyDetectedEntityInfo"/> within targeting range of <paramref name="pBlock"/>'s <see cref="IMyCubeGrid"/></item>
+        /// </list>
+        /// </summary>
+        /// <param name="pBlock"></param>
+        /// <param name="collection"></param>
         public void GetObstructions(Sandbox.ModAPI.Ingame.IMyTerminalBlock pBlock, ICollection<Sandbox.ModAPI.Ingame.MyDetectedEntityInfo> collection) =>
             _getObstructions?.Invoke(pBlock, collection);
+
+        /// <summary>
+        /// Returns the GridAi Target with priority <paramref name="priority"/> of <see cref="IMyCubeGrid"/> with EntityID <paramref name="shooter"/>.
+        /// </summary>
+        /// <remarks>
+        /// If the grid is valid but does not have a target, an empty <see cref="MyDetectedEntityInfo"/> is returned.
+        /// <para>
+        /// Default <paramref name="priority"/> = 0 returns the player-selected target.
+        /// </para>
+        /// </remarks>
+        /// <param name="shooter"></param>
+        /// <param name="priority"></param>
+        /// <returns>Nullable <see cref="MyDetectedEntityInfo"/>. Null if <paramref name="shooter"/> does not exist or lacks GridAi.</returns>
         public MyDetectedEntityInfo? GetAiFocus(long shooter, int priority = 0) => _getAiFocus?.Invoke(shooter, priority);
 
+        /// <summary>
+        /// Sets the GridAi Target of <paramref name="pBlock"/>'s <see cref="IMyCubeGrid"/> to EntityID <paramref name="target"/>.
+        /// </summary>
+        /// <remarks>
+        /// Default <paramref name="priority"/> = 0 sets the player-visible target.
+        /// </remarks>
+        /// <param name="pBlock"></param>
+        /// <param name="target"></param>
+        /// <param name="priority"></param>
+        /// <returns><see cref="true"/>  if successful, <see cref="false"/>  otherwise.</returns>
         public bool SetAiFocus(Sandbox.ModAPI.Ingame.IMyTerminalBlock pBlock, long target, int priority = 0) =>
             _setAiFocus?.Invoke(pBlock, target, priority) ?? false;
+
+        /// <summary>
+        /// Unsets the GridAi Target of <paramref name="pBlock"/>'s <see cref="IMyCubeGrid"/>.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="playerId"/> may be set to 0.
+        /// </remarks>
+        /// <param name="pBlock"></param>
+        /// <param name="playerId"></param>
+        /// <returns><see cref="true"/>  if successful, <see cref="false"/>  otherwise.</returns>
         public bool ReleaseAiFocus(Sandbox.ModAPI.Ingame.IMyTerminalBlock pBlock, long playerId) =>
             _releaseAiFocus?.Invoke(pBlock, playerId) ?? false;
+
+        /// <summary>
+        /// Returns the WeaponAi target of <paramref name="weaponId"/> on <paramref name="weapon"/>.
+        /// </summary>
+        /// <remarks>
+        /// Seems to always return null for static weapons.
+        /// </remarks>
+        /// <param name="weapon"></param>
+        /// <param name="weaponId"></param>
+        /// <returns>Nullable <see cref="MyDetectedEntityInfo"/>.</returns>
         public MyDetectedEntityInfo? GetWeaponTarget(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, int weaponId = 0) =>
             _getWeaponTarget?.Invoke(weapon, weaponId);
 
+        /// <summary>
+        /// Sets the WeaponAi target of <paramref name="weaponId"/> on <paramref name="weapon"/> to EntityID <paramref name="target"/>.
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <param name="target"></param>
+        /// <param name="weaponId"></param>
         public void SetWeaponTarget(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, long target, int weaponId = 0) =>
             _setWeaponTarget?.Invoke(weapon, target, weaponId);
 
+        /// <summary>
+        /// Fires <paramref name="weaponId"/> on <paramref name="weapon"/> once.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="allWeapons"/> uses all weapons on <paramref name="weapon"/>.
+        /// </remarks>
+        /// <param name="weapon"></param>
+        /// <param name="allWeapons"></param>
+        /// <param name="weaponId"></param>
         public void FireWeaponOnce(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, bool allWeapons = true, int weaponId = 0) =>
             _fireWeaponOnce?.Invoke(weapon, allWeapons, weaponId);
 
+        /// <summary>
+        /// Sets the Shoot On/Off toggle of <paramref name="weaponId"/> on <paramref name="weapon"/> to <see cref="bool"/> <paramref name="on"/>.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="allWeapons"/> uses all weapons on <paramref name="weapon"/>.
+        /// </remarks>
+        /// <param name="weapon"></param>
+        /// <param name="on"></param>
+        /// <param name="allWeapons"></param>
+        /// <param name="weaponId"></param>
         public void ToggleWeaponFire(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, bool on, bool allWeapons, int weaponId = 0) =>
             _toggleWeaponFire?.Invoke(weapon, on, allWeapons, weaponId);
 
+        /// <summary>
+        /// Returns whether or not <paramref name="weaponId"/> on <paramref name="weapon"/> is ready to fire.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="anyWeaponReady"/> uses all weapons on <paramref name="weapon"/>.
+        /// </remarks>
+        /// <param name="weapon"></param>
+        /// <param name="weaponId"></param>
+        /// <param name="anyWeaponReady"></param>
+        /// <param name="shootReady"></param>
+        /// <returns><see cref="true"/> if ready to fire, <see cref="false"/> otherwise.</returns>
         public bool IsWeaponReadyToFire(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, int weaponId = 0, bool anyWeaponReady = true,
             bool shootReady = false) =>
             _isWeaponReadyToFire?.Invoke(weapon, weaponId, anyWeaponReady, shootReady) ?? false;
 
+        /// <summary>
+        /// Returns the current Aiming Radius of <paramref name="weaponId"/> on <paramref name="weapon"/>.
+        /// </summary>
+        /// <param name="weapon"></param>
+        /// <param name="weaponId"></param>
+        /// <returns><see cref="float"/> range in meters.</returns>
         public float GetMaxWeaponRange(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, int weaponId) =>
             _getMaxWeaponRange?.Invoke(weapon, weaponId) ?? 0f;
+
 
         public bool GetTurretTargetTypes(Sandbox.ModAPI.Ingame.IMyTerminalBlock weapon, IList<string> collection, int weaponId = 0) =>
             _getTurretTargetTypes?.Invoke(weapon, collection, weaponId) ?? false;
@@ -237,6 +412,12 @@ namespace CoreSystems.Api
         public void MonitorEvents(Sandbox.ModAPI.Ingame.IMyTerminalBlock entity, int partId, Action<int, bool> action) =>
             _monitorEvents?.Invoke(entity, partId, action);
 
+        /// <summary>
+        /// Removes event monitoring from 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="partId"></param>
+        /// <param name="action"></param>
         public void UnMonitorEvents(Sandbox.ModAPI.Ingame.IMyTerminalBlock entity, int partId, Action<int, bool> action) =>
             _unmonitorEvents?.Invoke(entity, partId, action);
 
